@@ -34,11 +34,11 @@ Demo account after seed:
 - Forgot password uses single-use token.
 
 ## Cron jobs
-Configured in `vercel.json`:
-- `/api/cron/workflows`
-- `/api/cron/publish`
+Configured in `vercel.json` with **daily schedules** compatible with Vercel Hobby:
+- `/api/cron/workflows` at `0 6 * * *`
+- `/api/cron/publish` at `30 6 * * *`
 
-Each requires `x-cron-secret` header matching `CRON_SECRET`.
+Each requires `x-cron-secret` header matching `CRON_SECRET`. If you upgrade to Pro, you can increase frequency.
 
 ## Environment variables
 See `.env.example`:
