@@ -62,6 +62,9 @@ To unblock quick UI previews on Vercel, build is currently configured to ignore 
 4. Run Prisma migration during build or once via CLI.
 5. Ensure Cron secret configured and sent by cron requests.
 
+
+- If your Vercel project was previously configured with Output Directory = `public`, this repo now includes a committed `public/index.html` fallback so deploy validation won't fail. For full Next.js behavior, set Framework Preset to Next.js and clear custom Output Directory in Vercel settings.
+
 ## Known limitations
 - Social platform posting is a stub adapter (marks posted + logs payload).
 - URL ingestion uses basic HTML stripping for MVP readability extraction.
