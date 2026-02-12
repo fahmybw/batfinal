@@ -2,6 +2,9 @@
 
 BAT is a production-oriented Next.js MVP that unifies intake → memory → chat/content generation → calendar planning → scheduled publishing stubs.
 
+## Security note
+- Next.js is version-ranged (`^15.0.0`) to allow patched 15.x releases during install/deploy and avoid known vulnerable pins.
+
 ## Stack
 - Next.js App Router + TypeScript
 - TailwindCSS (dark-first minimalist UI)
