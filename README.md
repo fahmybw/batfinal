@@ -53,6 +53,9 @@ See `.env.example`:
 - `EMAIL_FROM`
 
 ## Deploy to Vercel
+
+### Preview deployment mode
+To unblock quick UI previews on Vercel, build is currently configured to ignore TypeScript and ESLint build-time failures in `next.config.ts`. This is a temporary tradeoff for preview deploys and should be removed before production hardening.
 1. Push repo.
 2. Import project in Vercel.
 3. Provision PostgreSQL and set env vars.
