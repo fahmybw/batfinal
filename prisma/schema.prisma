@@ -1,0 +1,260 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SourceType {
+  URL
+  NOTE
+  FILE
+}
+
+enum ScheduleType {
+  MANUAL
+  DAILY
+  WEEKLY
+}
+
+enum RunStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+enum Channel {
+  TIKTOK
+  INSTAGRAM
+  YOUTUBE
+  LINKEDIN
+  X
+}
+
+enum ItemStatus {
+  DRAFT
+  APPROVED
+  REJECTED
+  SCHEDULED
+  POSTED
+}
+
+model User {
+  id String @id @default(cuid())
+  name String
+  email String @unique
+  passwordHash String
+  twoFactorEnabled Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sessions Session[]
+  memberships WorkspaceMember[]
+  passwordResetTokens PasswordResetToken[]
+  twoFactorChallenges TwoFactorChallenge[]
+  chatMessages ChatMessage[]
+}
+
+model Workspace {
+  id String @id @default(cuid())
+  name String
+  timezone String @default("Africa/Cairo")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  members WorkspaceMember[]
+  dataSources DataSource[]
+  chunks DocumentChunk[]
+  workflows Workflow[]
+  workflowRuns WorkflowRun[]
+  chatThreads ChatThread[]
+  contentItems ContentItem[]
+  calendars ContentCalendar[]
+  scheduledPosts ScheduledPost[]
+}
+
+model WorkspaceMember {
+  id String @id @default(cuid())
+  role String @default("owner")
+  userId String
+  workspaceId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  @@unique([userId, workspaceId])
+}
+
+model Session {
+  id String @id @default(cuid())
+  token String @unique
+  userId String
+  workspaceId String
+  twoFactorVerified Boolean @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PasswordResetToken {
+  id String @id @default(cuid())
+  token String @unique
+  userId String
+  usedAt DateTime?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model TwoFactorChallenge {
+  id String @id @default(cuid())
+  userId String
+  sessionToken String
+  code String
+  expiresAt DateTime
+  usedAt DateTime?
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([sessionToken])
+}
+
+model DataSource {
+  id String @id @default(cuid())
+  workspaceId String
+  name String
+  type SourceType
+  sourceUrl String?
+  rawContent String
+  metadata Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+model DocumentChunk {
+  id String @id @default(cuid())
+  workspaceId String
+  dataSourceId String
+  sourceName String
+  content String
+  createdAt DateTime @default(now())
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  @@index([workspaceId, createdAt])
+}
+
+model Workflow {
+  id String @id @default(cuid())
+  workspaceId String
+  name String
+  scheduleType ScheduleType
+  enabled Boolean @default(true)
+  sourceIds String[]
+  lastRunAt DateTime?
+  createdAt DateTime @default(now())
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+model WorkflowRun {
+  id String @id @default(cuid())
+  workflowId String
+  workspaceId String
+  status RunStatus @default(PENDING)
+  log String
+  startedAt DateTime @default(now())
+  finishedAt DateTime?
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+model ChatThread {
+  id String @id @default(cuid())
+  workspaceId String
+  title String
+  createdAt DateTime @default(now())
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  messages ChatMessage[]
+}
+
+model ChatMessage {
+  id String @id @default(cuid())
+  threadId String
+  userId String?
+  role MessageRole
+  content String
+  citations Json?
+  createdAt DateTime @default(now())
+  thread ChatThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model ContentItem {
+  id String @id @default(cuid())
+  workspaceId String
+  title String
+  channel Channel
+  purpose String
+  postType String
+  tone String
+  constraints String?
+  createdAt DateTime @default(now())
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  versions ContentVersion[]
+}
+
+model ContentVersion {
+  id String @id @default(cuid())
+  contentItemId String
+  version Int
+  payload Json
+  createdAt DateTime @default(now())
+  contentItem ContentItem @relation(fields: [contentItemId], references: [id], onDelete: Cascade)
+}
+
+model ContentCalendar {
+  id String @id @default(cuid())
+  workspaceId String
+  name String
+  config Json
+  createdAt DateTime @default(now())
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  items CalendarItem[]
+}
+
+model CalendarItem {
+  id String @id @default(cuid())
+  calendarId String
+  workspaceId String
+  date DateTime
+  channel Channel
+  brief String
+  draftContent Json
+  status ItemStatus @default(DRAFT)
+  calendar ContentCalendar @relation(fields: [calendarId], references: [id], onDelete: Cascade)
+  @@index([workspaceId, status, date])
+}
+
+model ScheduledPost {
+  id String @id @default(cuid())
+  workspaceId String
+  calendarItemId String
+  channel Channel
+  scheduledFor DateTime
+  status ItemStatus @default(SCHEDULED)
+  payload Json
+  postedAt DateTime?
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  logs PostLog[]
+}
+
+model PostLog {
+  id String @id @default(cuid())
+  scheduledPostId String
+  message String
+  payload Json?
+  createdAt DateTime @default(now())
+  scheduledPost ScheduledPost @relation(fields: [scheduledPostId], references: [id], onDelete: Cascade)
+}
