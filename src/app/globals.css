@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body { @apply bg-background text-foreground antialiased; }
+.card { @apply bg-card border border-border rounded-xl p-4; }
+.input { @apply w-full bg-muted border border-border rounded-lg px-3 py-2; }
+.btn { @apply rounded-lg px-3 py-2 border border-border hover:border-primary transition; }
+.btn-primary { @apply bg-primary text-black border-primary; }
