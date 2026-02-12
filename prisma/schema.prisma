@@ -7,12 +7,46 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum SourceType { URL NOTE FILE }
-enum ScheduleType { MANUAL DAILY WEEKLY }
-enum RunStatus { PENDING RUNNING SUCCESS FAILED }
-enum MessageRole { USER ASSISTANT SYSTEM }
-enum Channel { TIKTOK INSTAGRAM YOUTUBE LINKEDIN X }
-enum ItemStatus { DRAFT APPROVED REJECTED SCHEDULED POSTED }
+enum SourceType {
+  URL
+  NOTE
+  FILE
+}
+
+enum ScheduleType {
+  MANUAL
+  DAILY
+  WEEKLY
+}
+
+enum RunStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+enum Channel {
+  TIKTOK
+  INSTAGRAM
+  YOUTUBE
+  LINKEDIN
+  X
+}
+
+enum ItemStatus {
+  DRAFT
+  APPROVED
+  REJECTED
+  SCHEDULED
+  POSTED
+}
 
 model User {
   id String @id @default(cuid())
